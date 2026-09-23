@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pathway — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F1B2D; --surface:#16233A; --surface2:#1E2C46; --line:#2A3A56;
+    --text:#ECEEF3; --muted:#8B97AC; --accent:#F5A93F; --accent-ink:#1B1204;
+    --good:#4FAE86;
+    box-sizing:border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:inherit;}
+  html{height:100%; scroll-padding-top: env(safe-area-inset-top, 0px);}
+  body{
+    height:100%; margin:0; background:#080D16; color:var(--text);
+    font-family:'Inter',sans-serif; display:flex; align-items:center; justify-content:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  .frame{
+    width:390px; max-width:100%; height:780px; max-height:100vh;
+    background:var(--bg); border-radius:28px; overflow:hidden; position:relative;
+    display:flex; flex-direction:column; box-shadow:0 30px 80px rgba(0,0,0,.5);
+    border:1px solid #1c2a42;
+  }
+  header.top{
+    padding:22px 20px 14px; display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--line); flex-shrink:0;
+  }
+  .brand{font-family:'Fraunces',serif; font-weight:600; font-size:20px; letter-spacing:.2px;}
+  .mode-toggle{
+    background:none; border:1px solid var(--line); color:var(--muted); font-family:'Inter';
+    font-size:12px; padding:6px 10px; border-radius:20px; cursor:pointer;
+  }
+  .mode-toggle:hover{color:var(--text); border-color:var(--muted);}
+  main{flex:1; overflow-y:auto; padding:18px 20px 90px;}
+  main::-webkit-scrollbar{width:0;}
+  nav.tabs{
+    position:absolute; bottom:0; left:0; right:0; display:flex;
+    background:var(--surface); border-top:1px solid var(--line);
+    padding:10px 8px calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  nav.tabs button{
+    flex:1; background:none; border:none; color:var(--muted); font-family:'Inter';
+    font-size:12px; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer;
+  }
+  nav.tabs button .dot{width:6px;height:6px;border-radius:50%;background:transparent;}
+  nav.tabs button.active{color:var(--accent);}
+  nav.tabs button.active .dot{background:var(--accent);}
+
+  h1.page-title{font-family:'Fraunces',serif; font-weight:600; font-size:24px; margin:2px 0 4px;}
+  p.page-sub{color:var(--muted); font-size:13px; margin:0 0 18px; line-height:1.5;}
+
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:16px;
+    padding:16px; margin-bottom:12px; cursor:pointer; transition:border-color .15s;
+  }
+  .card:hover{border-color:#3a4d70;}
+  .card-top{display:flex; gap:12px; align-items:flex-start;}
+  .mark{
+    width:42px;height:42px;border-radius:11px; background:var(--surface2);
+    display:flex;align-items:center;justify-content:center; font-family:'Fraunces';
+    font-weight:600; font-size:16px; flex-shrink:0; color:var(--accent);
+  }
+  .card h3{font-family:'Fraunces',serif; font-weight:600; font-size:16px; margin:0 0 3px;}
+  .card .tag{color:var(--muted); font-size:12px;}
+  .card .req-line{font-size:13px; color:var(--text); margin-top:10px; line-height:1.5;}
+  .badge{
+    display:inline-block; font-size:11px; padding:3px 8px; border-radius:20px;
+    border:1px solid var(--line); color:var(--muted); margin-top:10px;
+  }
+  .badge.company{color:#8fd3ff; border-color:#2a4a63;}
+  .badge.ai{color:var(--accent); border-color:#5a4620;}
+
+  .back{background:none;border:none;color:var(--muted);font-family:'Inter';font-size:13px;
+    padding:0; margin-bottom:14px; cursor:pointer; display:flex; align-items:center; gap:6px;}
+  .back:hover{color:var(--text);}
+
+  .detail-mark{width:56px;height:56px;border-radius:14px;background:var(--surface2);
+    display:flex;align-items:center;justify-content:center; font-family:'Fraunces';
+    font-weight:600; font-size:20px; color:var(--accent); margin-bottom:14px;}
+
+  section.block{margin-top:22px;}
+  section.block h4{font-size:12px; color:var(--muted); text-transform:none; margin:0 0 10px; font-weight:600;}
+  ul.reqs{list-style:none; margin:0; padding:0;}
+  ul.reqs li{font-size:14px; padding:9px 0; border-bottom:1px solid var(--line); line-height:1.5;}
+  ul.reqs li:last-child{border-bottom:none;}
+
+  .roadmap{list-style:none; margin:0; padding:0;}
+  .roadmap li{display:flex; gap:12px; padding:10px 0;}
+  .roadmap .num{
+    width:22px;height:22px;border-radius:50%; background:var(--surface2); color:var(--muted);
+    font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
+  }
+  .roadmap li.done .num{background:var(--good); color:#08251b;}
+  .roadmap .step-text{font-size:14px; line-height:1.5;}
+  .roadmap .step-sub{font-size:12px; color:var(--muted); margin-top:2px;}
+
+  .cta{
+    width:100%; background:var(--accent); color:var(--accent-ink); border:none; border-radius:12px;
+    padding:14px; font-family:'Inter'; font-weight:600; font-size:14px; cursor:pointer; margin-top:22px;
+  }
+  .cta:hover{filter:brightness(1.05);}
+  .cta.secondary{background:none; border:1px solid var(--line); color:var(--text);}
+  .cta.done{background:var(--good); color:#08251b;}
+
+  .note{font-size:12px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5;}
+
+  .video-box{
+    background:var(--surface2); border-radius:14px; aspect-ratio:16/10; display:flex;
+    flex-direction:column; align-items:center; justify-content:center; gap:8px; border:1px solid var(--line);
+  }
+  .play{width:44px;height:44px;border-radius:50%; background:var(--accent); display:flex;
+    align-items:center; justify-content:center; color:var(--accent-ink); font-size:16px;}
+  .video-box .cap{font-size:12px; color:var(--muted);}
+
+  .form input, .form textarea{
+    width:100%; background:var(--surface2); border:1px solid var(--line); border-radius:10px;
+    color:var(--text); font-family:'Inter'; font-size:13px; padding:11px 12px; margin-bottom:10px;
+  }
+  .form label{font-size:12px; color:var(--muted); display:block; margin-bottom:6px;}
+  .form-group{margin-bottom:14px;}
+
+  .reg-row{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .reg-row:last-child{border-bottom:none;}
+  .reg-row .name{font-weight:500;}
+  .reg-row .stage{font-size:11px; color:var(--muted);}
+
+  .empty{text-align:center; padding:60px 10px; color:var(--muted); font-size:13px; line-height:1.6;}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <header class="top">
+    <div class="brand">Pathway</div>
+    <button class="mode-toggle" id="modeToggle" onclick="toggleMode()">Switch to company view</button>
+  </header>
+
+  <main id="main"></main>
+
+  <nav class="tabs" id="tabs">
+    <button class="active" data-tab="browse" onclick="setTab('browse')">
+      <span class="dot"></span>Browse
+    </button>
+    <button data-tab="training" onclick="setTab('training')">
+      <span class="dot"></span>My training
+    </button>
+  </nav>
+</div>
+
+<script>
+// ---- demo data (fictional companies, for prototype purposes) ----
+const companies = [
+  {
+    id:1, name:"Nova Systems", initials:"NS", industry:"Backend engineering",
+    summary:"Hiring backend engineers with strong fundamentals in APIs and databases.",
+    requirements:["2+ yrs or strong project experience in Java or Node.js","Understanding of REST APIs and SQL databases","Basic system design knowledge","Comfortable with Git-based workflows"],
+    roadmap:[
+      {t:"API design fundamentals", s:"Building and documenting REST endpoints"},
+      {t:"Database modeling", s:"Schema design, indexing, query performance"},
+      {t:"System design basics", s:"Scaling a simple service"},
+      {t:"Mock technical round", s:"With a Nova Systems engineer"}
+    ],
+    trainer:"company"
+  },
+  {
+    id:2, name:"Bluepeak", initials:"BP", industry:"Frontend / product",
+    summary:"Looking for frontend developers who can ship polished, accessible UI.",
+    requirements:["Solid React fundamentals","CSS layout (flexbox/grid)","Basic accessibility awareness","Portfolio of 1-2 shipped projects"],
+    roadmap:[
+      {t:"React component patterns", s:"Hooks, state, composition"},
+      {t:"Responsive layout", s:"Building for mobile and desktop"},
+      {t:"Accessibility pass", s:"Keyboard nav, contrast, ARIA basics"},
+      {t:"Portfolio review", s:"Feedback from a Bluepeak designer"}
+    ],
+    trainer:"ai"
+  },
+  {
+    id:3, name:"Vertex Analytics", initials:"VA", industry:"Data & analytics",
+    summary:"Entry-level data analyst roles — SQL, spreadsheets, and clear reporting.",
+    requirements:["Comfortable writing SQL queries","Excel or Sheets proficiency","Ability to summarize data for non-technical readers","Attention to detail"],
+    roadmap:[
+      {t:"SQL fundamentals", s:"Joins, aggregation, subqueries"},
+      {t:"Dashboarding basics", s:"Turning data into a clear view"},
+      {t:"Writing a data summary", s:"Explaining findings simply"},
+      {t:"Practice case study", s:"Reviewed by Vertex's data team"}
+    ],
+    trainer:"ai"
+  },
+  {
+    id:4, name:"Solstice Labs", initials:"SL", industry:"QA & testing",
+    summary:"Building a QA bench — manual and basic automated testing.",
+    requirements:["Understanding of test case design","Bug reporting and tracking tools","Basic scripting (any language) is a plus","Patience for detail-heavy work"],
+    roadmap:[
+      {t:"Test case fundamentals", s:"Writing clear, repeatable cases"},
+      {t:"Bug reporting", s:"Using a tracker, writing reproducible reports"},
+      {t:"Intro to automation", s:"Basic scripted checks"},
+      {t:"Live testing session", s:"With a Solstice Labs QA lead"}
+    ],
+    trainer:"company"
+  }
+];
+
+let mode = "candidate"; // candidate | company
+let tab = "browse";
+let view = {screen:"list"}; // list | detail | training
+let registered = new Set();
+let trainingProgress = {}; // companyId -> steps completed
+
+function toggleMode(){
+  mode = mode === "candidate" ? "company" : "candidate";
+  document.getElementById('modeToggle').textContent = mode === "candidate" ? "Switch to company view" : "Switch to candidate view";
+  document.getElementById('tabs').style.display = mode === "candidate" ? "flex" : "none";
+  view = {screen:"list"};
+  render();
+}
+
+function setTab(t){ tab = t; view = {screen:"list"}; render(); }
+
+function openCompany(id){ view = {screen:"detail", id}; render(); }
+function backToList(){ view = {screen:"list"}; render(); }
+
+function register(id){
+  registered.add(id);
+  trainingProgress[id] = trainingProgress[id] || 0;
+  render();
+}
+
+function startTraining(id){
+  view = {screen:"training", id};
+  render();
+}
+
+function advanceStep(id, totalSteps){
+  trainingProgress[id] = Math.min((trainingProgress[id]||0) + 1, totalSteps);
+  render();
+}
+
+function esc(s){ return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function render(){
+  const main = document.getElementById('main');
+
+  if(mode === "company"){
+    main.innerHTML = renderCompanyDashboard();
+    return;
+  }
+
+  if(tab === "browse"){
+    if(view.screen === "detail"){
+      main.innerHTML = renderCompanyDetail(view.id);
+    } else {
+      main.innerHTML = renderBrowseList();
+    }
+  } else {
+    if(view.screen === "training"){
+      main.innerHTML = renderTraining(view.id);
+    } else {
+      main.innerHTML = renderMyTrainingList();
+    }
+  }
+}
+
+function renderBrowseList(){
+  let html = `<h1 class="page-title">Company roadmaps</h1>
+  <p class="page-sub">Browse hiring requirements and training paths, straight from the companies (demo data).</p>`;
+  companies.forEach(c => {
+    html += `<div class="card" onclick="openCompany(${c.id})">
+      <div class="card-top">
+        <div class="mark">${c.initials}</div>
+        <div>
+          <h3>${c.name}</h3>
+          <div class="tag">${c.industry}</div>
+        </div>
+      </div>
+      <div class="req-line">${c.summary}</div>
+      <span class="badge ${c.trainer === 'company' ? 'company' : 'ai'}">${c.trainer === 'company' ? 'Trained by company staff' : 'AI-guided training'}</span>
+    </div>`;
+  });
+  return html;
+}
+
+function renderCompanyDetail(id){
+  const c = companies.find(x => x.id === id);
+  const isRegistered = registered.has(id);
+  let html = `<button class="back" onclick="backToList()">&larr; Back</button>
+  <div class="detail-mark">${c.initials}</div>
+  <h1 class="page-title">${c.name}</h1>
+  <p class="page-sub">${c.industry} &middot; ${c.summary}</p>
+
+  <section class="block">
+    <h4>What they're looking for</h4>
+    <ul class="reqs">${c.requirements.map(r => `<li>${r}</li>`).join('')}</ul>
+  </section>
+
+  <section class="block">
+    <h4>Training roadmap</h4>
+    <ul class="roadmap">
+      ${c.roadmap.map((s,i) => `<li><span class="num">${i+1}</span><div><div class="step-text">${s.t}</div><div class="step-sub">${s.s}</div></div></li>`).join('')}
+    </ul>
+  </section>
+
+  ${isRegistered
+    ? `<button class="cta done" onclick="startTraining(${c.id})">Registered — start training</button>
+       <p class="note">Free to join. No payment required.</p>`
+    : `<button class="cta" onclick="register(${c.id})">Register for this roadmap</button>
+       <p class="note">Free to join. Training runs ${c.trainer === 'company' ? "with " + c.name + "'s own trainers." : "through AI-guided video sessions."}</p>`
+  }`;
+  return html;
+}
+
+function renderMyTrainingList(){
+  const mine = companies.filter(c => registered.has(c.id));
+  let html = `<h1 class="page-title">My training</h1>
+  <p class="page-sub">Roadmaps you've registered for.</p>`;
+  if(mine.length === 0){
+    html += `<div class="empty">Nothing here yet.<br>Register for a company roadmap under Browse to start training.</div>`;
+    return html;
+  }
+  mine.forEach(c => {
+    const done = trainingProgress[c.id] || 0;
+    html += `<div class="card" onclick="startTraining(${c.id})">
+      <div class="card-top">
+        <div class="mark">${c.initials}</div>
+        <div>
+          <h3>${c.name}</h3>
+          <div class="tag">${done} of ${c.roadmap.length} steps complete</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderTraining(id){
+  const c = companies.find(x => x.id === id);
+  const done = trainingProgress[id] || 0;
+  const total = c.roadmap.length;
+  const finished = done >= total;
+  let html = `<button class="back" onclick="setTab('training')">&larr; Back</button>
+  <h1 class="page-title">${c.name} training</h1>
+  <p class="page-sub">${c.trainer === 'company' ? 'Delivered by ' + c.name + "'s training team." : 'Delivered by an AI-guided virtual trainer.'}</p>
+
+  <div class="video-box">
+    <div class="play">&#9658;</div>
+    <div class="cap">${c.trainer === 'company' ? c.name + ' trainer session' : 'AI avatar walkthrough'} &middot; Step ${Math.min(done+1,total)} of ${total}</div>
+  </div>
+
+  <section class="block">
+    <h4>Roadmap progress</h4>
+    <ul class="roadmap">
+      ${c.roadmap.map((s,i) => `<li class="${i < done ? 'done' : ''}"><span class="num">${i < done ? '&#10003;' : i+1}</span><div><div class="step-text">${s.t}</div><div class="step-sub">${s.s}</div></div></li>`).join('')}
+    </ul>
+  </section>
+
+  ${finished
+    ? `<button class="cta done" disabled>Roadmap complete</button><p class="note">You've finished every step in this roadmap.</p>`
+    : `<button class="cta" onclick="advanceStep(${id}, ${total})">Mark step complete</button>`
+  }`;
+  return html;
+}
+
+function renderCompanyDashboard(){
+  const sampleRegs = [
+    {name:"Registrant A", stage:"Step 2 of 4"},
+    {name:"Registrant B", stage:"Registered"},
+    {name:"Registrant C", stage:"Roadmap complete"}
+  ];
+  return `<h1 class="page-title">Company dashboard</h1>
+  <p class="page-sub">Post a roadmap and see who's registered (demo view).</p>
+
+  <section class="block">
+    <h4>Post a new roadmap</h4>
+    <div class="form">
+      <div class="form-group"><label>Role / requirement summary</label><input placeholder="e.g. Backend engineer — Java, SQL, APIs"></div>
+      <div class="form-group"><label>Roadmap steps</label><textarea rows="3" placeholder="One step per line"></textarea></div>
+    </div>
+    <button class="cta secondary">Publish roadmap</button>
+  </section>
+
+  <section class="block">
+    <h4>Registered candidates</h4>
+    ${sampleRegs.map(r => `<div class="reg-row"><span class="name">${r.name}</span><span class="stage">${r.stage}</span></div>`).join('')}
+  </section>`;
+}
+
+render();
+</script>
+</body>
+</html>
